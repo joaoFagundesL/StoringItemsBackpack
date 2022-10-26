@@ -23,9 +23,13 @@ form.addEventListener('submit', (evento)=> {
     if(existe) { //se o elemento ja existe
         itemAtual.id = existe.id; // se o elemento existe ele vai ter um id. Logo o itemAtual vai ter esse mesmo id
         atualizaElemento(itemAtual);
-        itens[existe.id] = itemAtual // sobreescreve o array e consequentemente o localStorage
-    } else { //se o elemento nao existe
-        itemAtual.id = itens.length; // crio um id com base no tamanho do array. Ou seja, o id incrementado
+        itens[itens.findIndex(elemento => elemento.id === existe.id)] = itemAtual // sobreescreve o array e consequentemente o localStorage
+    } else { //se o elemento nao existe 
+        if (itens[itens.length - 1]) {
+            itemAtual.id = itens[itens.length-1].id + 1;
+        } else {
+            itemAtual.id = 0;
+        }
         criarElemento(itemAtual); // crio o elemento
         itens.push(itemAtual); // jogo o elemento no array
     }
@@ -47,9 +51,28 @@ function criarElemento(itemAtual) {
     novoItem.appendChild(numeroItem);
     novoItem.innerHTML += itemAtual.nome;
 
+    novoItem.appendChild(criarBotaoDeleta(itemAtual.id)); // Cada elemento vai ter um botao
+
     lista.appendChild(novoItem);
 }
 
 function atualizaElemento(item) {
     document.querySelector(`[data-id = "${item.id}"]`).innerHTML = item.quantidade;
+}
+
+function criarBotaoDeleta(id) {
+    const botao = document.createElement('button');
+    botao.innerText = 'X';
+
+    botao.addEventListener('click', (elemento) => {
+        removerElemento(elemento.target.parentNode, id); // O parent node se refere ao li.
+    });
+
+    return botao;
+}
+
+function removerElemento(tag, id) {
+    tag.remove(); 
+    itens.splice(itens.findIndex(elemento => elemento.id === id), 1);
+    localStorage.setItem("itens", JSON.stringify(itens))
 }
